@@ -233,6 +233,12 @@ module Jekyll
     # Refer https://byparker.com/blog/2017/schwartzian-transform-faster-sorting/ for details
     def sort_docs_by_key!
       meta_key = metadata["sort_by"]
+
+      reverse = meta_key =~ /_rev$/
+      if reverse != nil
+        meta_key = meta_key[0, reverse]
+      end
+
       # Modify `docs` array to cache document's property along with the Document instance
       docs.map! { |doc| [doc.data[meta_key], doc] }.sort! do |apples, olives|
         order = determine_sort_order(meta_key, apples, olives)
@@ -247,6 +253,10 @@ module Jekyll
 
         # Finally restore the `docs` array with just the Document objects themselves
       end.map!(&:last)
+
+      if reverse
+        docs.reverse!
+      end
     end
 
     def determine_sort_order(sort_key, apples, olives)
